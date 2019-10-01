@@ -82,6 +82,12 @@ union{
 	uint16_t reg[57];
 }registers;
 
+uint8_t lock;
+uint32_t lockedby;
+uint32_t client;
+
+void fileout(void);
+
 void dump_registers(void);
 
 #endif

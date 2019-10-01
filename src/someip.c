@@ -20,10 +20,10 @@ void find_someip(char* buffer, int maxlen, int* nextpos, struct someip_t* packet
 	buffer += sizeof(packet->header.b);
 	*nextpos += sizeof(packet->header.b);
 
-	packet->header.f.messageID.b = htonl(packet->header.f.messageID.b); 
+	packet->header.f.messageID.b = htonl(packet->header.f.messageID.b);
     packet->header.f.length = htonl(packet->header.f.length);
     packet->header.f.requestID.b = htonl(packet->header.f.requestID.b);
-	
+
 	//dump_someip(packet);
 
 	//printf("[*] ML: %d, NP: %d, HL: %d\n << %d < %d >>?\n\n",maxlen, *nextpos, packet->header.f.length, maxlen-((*nextpos)+8), packet->header.f.length);
@@ -43,13 +43,13 @@ void find_someip(char* buffer, int maxlen, int* nextpos, struct someip_t* packet
 void pac2buf(struct someip_t* packet, char** buffer){
 	if(*buffer == NULL)
 		*buffer = malloc(sizeof(packet->header)+packet->header.f.length-8);
-	
+
 	memcpy(*buffer, packet, sizeof(packet->header)+packet->header.f.length-8);
 	memcpy(*buffer+sizeof(packet->header), packet->payload, packet->header.f.length-8);
-	
+
 	for(int i=0; i < 3; i++){
 		uint32_t t;
-		
+
 		memcpy(&t, (*buffer)+(i*sizeof(uint32_t)), sizeof(uint32_t));
 		t = htonl(t);
 		memcpy((*buffer)+(i*sizeof(uint32_t)), &t, sizeof(uint32_t));
@@ -66,7 +66,7 @@ void process_someip(struct someip_t* packet,struct someip_t* ret){
 
 	char **r_buf = &ret->payload;
 	uint32_t* r_len = &ret->header.f.length;
-	
+
 	ret->header.f.msg_typ = 0x80;
 
 	switch(packet->header.f.messageID.f.methodID){
@@ -86,7 +86,7 @@ void process_someip(struct someip_t* packet,struct someip_t* ret){
 			printf("NO METHOD: %04X", packet->header.f.messageID.f.methodID);
 			exit(-1);
 	}
-	
+
 	*r_len += 8;
 }
 
