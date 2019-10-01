@@ -1,8 +1,7 @@
 #ifndef __SOMEIP_H__
 #define __SOMEIP_H__
 
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <stdint.h>
 
 #include "methods.h"
 
@@ -36,6 +35,10 @@ struct someip_t{
 
 void find_someip(char* buffer, int maxlen, int* nextpos, struct someip_t* packet);
 void process_someip(struct someip_t* pakcet, struct someip_t* ret);
+
+void pac2buf(struct someip_t* packet, char** buffer);
+
+void dump_someip(struct someip_t* packet);
 void dump(char* buffer, int len);
 
 #endif

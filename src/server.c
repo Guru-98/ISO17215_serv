@@ -12,16 +12,17 @@
 #define PORT	17215
 #define MAXLINE 1024
 
-void process_payload(char* payload, int len);
+void process_payload(char* payload, int len, char** ret_payload, int* ret_len);
 
 int main() {
 	int sd;
 	char buffer[MAXLINE];
 	struct sockaddr_in me, you;
 	struct in_addr localaddr;
-
-	char* hello = "OK";
-
+	
+	char *ret_buf;
+	int ret_len;
+	
 	if ( (sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
 		perror("socket creation failed");
 		exit(EXIT_FAILURE);
@@ -46,33 +47,69 @@ int main() {
 	        exit(EXIT_FAILURE);
     	}
 
-	int you_len, n;
-	memset(buffer, 0 , sizeof(buffer));
-	n = recvfrom(sd, (char *)buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &you, &you_len);
 
-   	printf("CLIENT : %s\n",inet_ntoa(you.sin_addr));
-   	process_payload(buffer, n);
+	while(1){
+		int you_len, n;
+		memset(buffer, 0 , sizeof(buffer));
+		n = recvfrom(sd, (char *)buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &you, &you_len);
 
-	if(sendto(sd, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &you, you_len) <0 ){
-		perror("response error");
-		exit(EXIT_FAILURE);
+		//printf("CLIENT : %s\n",inet_ntoa(you.sin_addr));
+		//printf("D_CLIENT: %d(%04X)\n",n,n);
+		//dump(buffer, n);
+		
+		process_payload(buffer, n, &ret_buf, &ret_len);
+		
+		//printf("RESP:\n");
+		//dump(ret_buf,ret_len);
+
+		if(sendto(sd, (const char *)ret_buf, ret_len, MSG_CONFIRM, (const struct sockaddr *) &you, you_len) <0 ){
+			perror("response error");
+			exit(EXIT_FAILURE);
+		}
 	}
-	printf("Hello message sent.\n");
-
+	
 	return 0;
 }
 
-void process_payload(char* payload, int len){
+void process_payload(char* payload, int len, char** ret_payload, int* ret_len){
 	struct someip_t packet;
-	struct someip_t ret;
+	struct someip_t ret_pack;
 	int i=0,pos=0;
+	
+	*ret_len = 0;
+	*ret_payload = NULL;
 
-	while(i<len){
+	while(16<len){
+		char* temp = NULL;
+		
         memset(&packet, 0 , sizeof(struct someip_t));
 		find_someip(payload+i,len,&pos,&packet);
 		if(pos == -1)
 			break;
         i+=pos;
-		process_someip(&packet,&ret);
+		len-=pos;
+		
+		//printf("\n\nREQUEST %04X\n",packet.header.f.requestID.f.sessionID+1);
+		//dump_someip(&packet);
+		
+		process_someip(&packet,&ret_pack);
+
+		//printf("\n\nREPLY %04X\n",ret_pack.header.f.requestID.f.sessionID+1);
+		//dump_someip(&ret_pack);
+		
+		//printf("Before realloc: (%d B)\n",*ret_len);
+		//dump(*ret_payload,*ret_len);
+		
+		pac2buf(&ret_pack, &temp);
+		
+		//printf("Buffer to add:");
+		//dump(temp,sizeof(ret_pack.header)+ret_pack.header.f.length-8);
+		
+		*ret_payload = realloc(*ret_payload, *ret_len+sizeof(ret_pack.header)+ret_pack.header.f.length-8);
+		memcpy((*ret_payload)+(*ret_len), temp, sizeof(ret_pack.header)+ret_pack.header.f.length-8);
+		*ret_len += sizeof(ret_pack.header)+ret_pack.header.f.length-8;
+
+		//printf("After realloc: (%d B)\n",*ret_len);
+		//dump(*ret_payload,*ret_len);
 	}
 }
