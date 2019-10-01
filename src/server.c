@@ -71,15 +71,15 @@ int main() {
 	return 0;
 }
 
-void process_payload(char* payload, int len, char** ret_payload, int* ret_len){
+void process_payload(char* payload, int maxlen, char** ret_payload, int* ret_len){
 	struct someip_t packet;
 	struct someip_t ret_pack;
-	int i=0,pos=0;
+	int i=0,pos=0,len=maxlen;
 	
 	*ret_len = 0;
 	*ret_payload = NULL;
 
-	while(16<len){
+	while(i<maxlen){
 		char* temp = NULL;
 		
         memset(&packet, 0 , sizeof(struct someip_t));

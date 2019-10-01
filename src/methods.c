@@ -99,7 +99,7 @@ void getCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 	}
 	
 	//dump((char *)regBlock, sizeof(struct sImagerRegister) * no_reg);
-	dump_registers();
+	//dump_registers();
 	
 	*rlen = sizeof(struct sImagerRegister) * no_reg + sizeof(no_reg);
 	*retbuf = (char *) malloc(*rlen + sizeof(no_reg));

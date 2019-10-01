@@ -4,7 +4,7 @@
 struct sImagerRegister{
 		uint16_t reg;
 		uint16_t val;
-}w;
+};
 
 void setCamExclusive(char* payload,int len,char** retbuf, int* rlen);
 void setCamRegisters(char* payload,int len,char** retbuf, int* rlen);
