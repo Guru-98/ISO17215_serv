@@ -34,12 +34,12 @@ void setCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 	//dump(payload,16);
 	//printf("\t%s: No. reg: %d (%08X)\n", __FUNCTION__, no_reg, no_reg);
 	
-	regBlock = (struct sImagerRegister*) malloc(sizeof(sImagerRegister_i) * no_reg );
+	regBlock = (struct sImagerRegister*) malloc(sizeof(struct sImagerRegister) * no_reg );
 	if(regBlock == NULL){
 		printf("NOMEM");
 		return;
 	}
-	memcpy(regBlock, payload+sizeof(no_reg), sizeof(sImagerRegister_i) * no_reg);
+	memcpy(regBlock, payload+sizeof(no_reg), sizeof(struct sImagerRegister) * no_reg);
 
 	//dump((char *)regBlock, sizeof(struct sImagerRegister) * no_reg);
 
@@ -78,7 +78,7 @@ void getCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 	
 	memcpy(reg_list, payload+sizeof(no_reg), sizeof(uint16_t) * no_reg);
 	
-	regBlock = (struct sImagerRegister*) malloc(sizeof(sImagerRegister_i) * no_reg );
+	regBlock = (struct sImagerRegister*) malloc(sizeof(struct sImagerRegister) * no_reg );
 	if(regBlock == NULL){
 		printf("NOMEM");
 		return;
@@ -98,9 +98,10 @@ void getCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 		regBlock[i].val = htons(regBlock[i].val);
 	}
 	
-	//dump((char *)regBlock, sizeof(sImagerRegister_i) * no_reg);
+	//dump((char *)regBlock, sizeof(struct sImagerRegister) * no_reg);
+	dump_registers();
 	
-	*rlen = sizeof(sImagerRegister_i) * no_reg + sizeof(no_reg);
+	*rlen = sizeof(struct sImagerRegister) * no_reg + sizeof(no_reg);
 	*retbuf = (char *) malloc(*rlen + sizeof(no_reg));
 	memcpy(*retbuf, (char *)&no_reg, sizeof(no_reg));
 	memcpy(*retbuf+sizeof(no_reg), (char *)regBlock, *rlen);
@@ -137,70 +138,38 @@ const struct sImagerRegister* _getRegisters(uint16_t* addressList, uint16_t regC
 }
 */
 
-void _setRegister(uint16_t regAddress, uint16_t regValue){
-	switch(regAddress){
-		case 0xb042:
-			m_ip.A = regValue;
-		break;
-		case 0xb043:
-			m_ip.B = regValue;
-		break;
-		case 0xb044:
-			m_ip.C = regValue;
-		break;
-		case 0xb045:
-			m_ip.D = regValue;
-		break;
-		case 0xb046:
-			m_ip_mask.A = regValue;
-		break;
-		case 0xb047:
-			m_ip_mask.B = regValue;
-		break;
-		case 0xb048:
-			m_ip_mask.C = regValue;
-		break;
-		case 0xb049:
-			m_ip_mask.D = regValue;
-		break;
-		default:
-			printf("No such register: %04X\n", regAddress);
-			exit(-1);
-	}
-}
-
 uint16_t _getRegister(uint16_t regAddress){
 	uint16_t regValue;
-	
-	switch(regAddress){
-		case 0xb042:
-			regValue = m_ip.A;
-		break;
-		case 0xb043:
-			regValue = m_ip.B;
-		break;
-		case 0xb044:
-			regValue = m_ip.C;
-		break;
-		case 0xb045:
-			regValue = m_ip.D;
-		break;
-		case 0xb046:
-			regValue = m_ip_mask.A;
-		break;
-		case 0xb047:
-			regValue = m_ip_mask.B;
-		break;
-		case 0xb048:
-			regValue = m_ip_mask.C;
-		break;
-		case 0xb049:
-			regValue = m_ip_mask.D;
-		break;
-		default:
-			printf("No such register: %04X\n", regAddress);
-			exit(-1);
+
+	if( 0xB041 <= regAddress && regAddress <= 0xB079 ){
+		regValue = registers.reg[regAddress-0xB040];
+	}
+	else if( 0xB00C == regAddress ){
+		regValue = registers.reg[0];
+	}
+	else if ( 0xB171 <= regAddress && regAddress <= 0xB181 ){
+		regValue = registers.reg[56+regAddress-0xB171];
+	}
+	else{
+		printf("No such register: %04X\n", regAddress);
+		exit(-1);
 	}
 	
 	return regValue;
+}
+
+void _setRegister(uint16_t regAddress, uint16_t regValue){
+	if( 0xB041 <= regAddress && regAddress <= 0xB079 ){
+		registers.reg[regAddress-0xB040] = regValue;
+	}
+	else if( 0xB00C == regAddress ){
+		registers.reg[0] = regValue;
+	}
+	else if ( 0xB171 <= regAddress && regAddress <= 0xB181 ){
+		registers.reg[56+regAddress-0xB171] = regValue;
+	}
+	else{
+		printf("No such register: %04X\n", regAddress);
+		exit(-1);
+	}
 }
