@@ -56,9 +56,6 @@ void setCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 
 	_setRegisters(regBlock, no_reg);
 
-	//dump((char *)&m_ip, sizeof(m_ip));
-	//dump((char *)&m_ip_mask, sizeof(m_ip_mask));
-
 	fileout();
 
 	*rlen = 0;
@@ -105,7 +102,7 @@ void getCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 	}
 
 	//dump((char *)regBlock, sizeof(struct sImagerRegister) * no_reg);
-	//dump_registers();
+	dump_registers();
 
 	*rlen = sizeof(struct sImagerRegister) * no_reg + sizeof(no_reg);
 	*retbuf = (char *) malloc(*rlen + sizeof(no_reg));
@@ -152,13 +149,13 @@ uint16_t _getRegister(uint16_t regAddress){
 	uint16_t regValue;
 
 	if( 0xB041 <= regAddress && regAddress <= 0xB079 ){
-		regValue = registers.reg[regAddress-0xB040];
+		regValue = registers.reg[regAddress-0xB041+1];
 	}
 	else if( 0xB00C == regAddress ){
 		regValue = registers.reg[0];
 	}
 	else if ( 0xB171 <= regAddress && regAddress <= 0xB181 ){
-		regValue = registers.reg[56+regAddress-0xB171];
+		regValue = registers.reg[54+regAddress-0xB171];
 	}
 	else{
 		printf("No such register: %04X\n", regAddress);
@@ -170,13 +167,13 @@ uint16_t _getRegister(uint16_t regAddress){
 
 void _setRegister(uint16_t regAddress, uint16_t regValue){
 	if( 0xB041 <= regAddress && regAddress <= 0xB079 ){
-		registers.reg[regAddress-0xB040] = regValue;
+		registers.reg[regAddress-0xB041+1] = regValue;
 	}
 	else if( 0xB00C == regAddress ){
 		registers.reg[0] = regValue;
 	}
 	else if ( 0xB171 <= regAddress && regAddress <= 0xB181 ){
-		registers.reg[56+regAddress-0xB171] = regValue;
+		registers.reg[54+regAddress-0xB171] = regValue;
 	}
 	else{
 		printf("No such register: %04X\n", regAddress);
