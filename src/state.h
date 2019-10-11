@@ -87,6 +87,7 @@ uint32_t lockedby;
 uint32_t client;
 
 void fileout(void);
+void filein(void);
 
 void dump_registers(void);
 

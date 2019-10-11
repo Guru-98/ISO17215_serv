@@ -49,6 +49,7 @@ int main() {
     	}
 
 
+    filein();
 	while(1){
 		int you_len, n;
 		memset(buffer, 0 , sizeof(buffer));

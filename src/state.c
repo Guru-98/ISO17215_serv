@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "state.h"
 
@@ -24,7 +25,7 @@ void dump_registers(void){
 	printf("%x == %x\n",&registers.stream_src_port.B,&registers.reg[48]);
 	*/
 }
-
+unsigned char gateway[32];
 void fileout(void){
 	FILE *fp,*network;
 	char strin[512];
@@ -58,6 +59,10 @@ void fileout(void){
 			case 3:
 				sprintf(strout,"%d.%d.%d.%d\n",registers.m_ip_mask.A,registers.m_ip_mask.B,registers.m_ip_mask.C,registers.m_ip_mask.D);
 			break;
+			case 4:
+			        memcpy(strout,gateway,strlen(gateway));
+			        
+			break;
 			case 9:
 				sprintf(strout,"%s\n",&registers.dhcp_hostname);
 			break;
@@ -79,4 +84,47 @@ void fileout(void){
 
 	remove("network_settings.txt");
 	rename("network", "network_settings.txt");
+}
+
+void filein(void){
+	FILE *fp,*network;
+	char strin[512];
+	char strout[512];
+	uint16_t data;
+	int linectr = 0;
+	fp = fopen("network_settings.txt","r");
+	network = fopen("network","w+");
+
+	if(fp == NULL || network == NULL){
+		printf("FILE IO ERROR\n");
+		exit(-1);
+	}
+	if(feof(fp)){
+		printf("EMPTY FILE\n");
+		exit(-1);
+	}
+
+	while(!feof(fp)){
+		fgets(strin, 512, fp);
+		if(!feof(fp)){
+			++linectr;
+		}
+		printf("-%d : %s",linectr,strin);
+		switch(linectr){
+			case 1:
+				//sscanf(strin,"%s\n",registers.enable_dhcp? "enable": "disable");
+			break;
+			case 2:
+				sscanf(strin,"%d.%d.%d.%d\n",&registers.m_ip.A,&registers.m_ip.B,&registers.m_ip.C,&registers.m_ip.D);
+			break;
+			case 3:
+				sscanf(strin,"%d.%d.%d.%d\n",&registers.m_ip_mask.A,&registers.m_ip_mask.B,&registers.m_ip_mask.C,&registers.m_ip_mask.D);
+			break;
+			case 9:
+				sscanf(strin,"%s\n",registers.dhcp_hostname);
+			break;
+		}
+	}
+
+	fclose(fp);
 }
