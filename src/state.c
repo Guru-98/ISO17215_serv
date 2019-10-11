@@ -66,11 +66,14 @@ void fileout(void){
 			case 9:
 				sprintf(strout,"%s\n",&registers.dhcp_hostname);
 			break;
+			case 19:
+				sprintf(strout,"%d\n",(registers.udp_comm_port.A<<8)+registers.udp_comm_port.B);
+			break;
 			case 20:
 				sprintf(strout,"%d\n",(registers.stream_port.A<<8)+registers.stream_port.B);
 			break;
-			case 19:
-				sprintf(strout,"%d\n",(registers.udp_comm_port.A<<8)+registers.udp_comm_port.B);
+			case 21:
+				sprintf(strout,"%s\n",registers.strem_proto? "disable": "enable");
 			break;
 			default:
 				sprintf(strout,"%s",strin);
