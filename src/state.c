@@ -25,7 +25,7 @@ void dump_registers(void){
 	printf("%x == %x\n",&registers.stream_src_port.B,&registers.reg[48]);
 	*/
 }
-unsigned char gateway[32];
+
 void fileout(void){
 	FILE *fp,*network;
 	char strin[512];
@@ -59,10 +59,6 @@ void fileout(void){
 			case 3:
 				sprintf(strout,"%d.%d.%d.%d\n",registers.m_ip_mask.A,registers.m_ip_mask.B,registers.m_ip_mask.C,registers.m_ip_mask.D);
 			break;
-			case 4:
-			        memcpy(strout,gateway,strlen(gateway));
-			        
-			break;
 			case 9:
 				sprintf(strout,"%s\n",&registers.dhcp_hostname);
 			break;
@@ -73,7 +69,7 @@ void fileout(void){
 				sprintf(strout,"%d\n",(registers.stream_port.A<<8)+registers.stream_port.B);
 			break;
 			case 21:
-				sprintf(strout,"%s\n",registers.strem_proto? "disable": "enable");
+				sprintf(strout,"%s\n",registers.stream_proto? "disable": "enable");
 			break;
 			default:
 				sprintf(strout,"%s",strin);
@@ -115,7 +111,12 @@ void filein(void){
 		printf("-%d : %s",linectr,strin);
 		switch(linectr){
 			case 1:
-				//sscanf(strin,"%s\n",registers.enable_dhcp? "enable": "disable");
+			    if(strcmp(strin,"enable") == 0){
+			        registers.enable_dhcp = 1;
+			    }
+			    else if(strcmp(strin,"disable") == 0){
+			        registers.enable_dhcp = 0;
+			    }
 			break;
 			case 2:
 				sscanf(strin,"%d.%d.%d.%d\n",&registers.m_ip.A,&registers.m_ip.B,&registers.m_ip.C,&registers.m_ip.D);
@@ -126,6 +127,25 @@ void filein(void){
 			case 9:
 				sscanf(strin,"%s\n",registers.dhcp_hostname);
 			break;
+			case 19:
+				sscanf(strin,"%d\n", &data);
+				registers.udp_comm_port.A = (uint8_t) data>>8;
+				registers.udp_comm_port.B = (uint8_t) data;
+			break;
+			case 20:
+				sscanf(strin,"%d\n", &data);
+				registers.stream_port.A = (uint8_t) data>>8;
+				registers.stream_port.B = (uint8_t) data;
+			break;
+			case 21:
+			    if(strcmp(strin,"enable") == 0){
+			        registers.stream_proto = 0;
+			    }
+			    else if(strcmp(strin,"disable") == 0){
+			        registers.stream_proto = 1;
+			    }
+			break;
+
 		}
 	}
 
