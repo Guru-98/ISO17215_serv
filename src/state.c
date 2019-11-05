@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "state.h"
-
+#define FILEPATH "network_setting.txt"
 void dump_registers(void){
 	printf("%s : %s\n","DHCP_EN",registers.enable_dhcp? "enable": "disable");
 	printf("%s : %d.%d.%d.%d\n","MY IP",registers.m_ip.A,registers.m_ip.B,registers.m_ip.C,registers.m_ip.D);
@@ -31,7 +31,7 @@ void fileout(void){
 	char strin[512];
 	char strout[512];
 	int linectr = 0;
-	fp = fopen("network_settings.txt","r");
+	fp = fopen(FILEPATH,"r");
 	network = fopen("network","w+");
 
 	if(fp == NULL || network == NULL){
@@ -63,14 +63,15 @@ void fileout(void){
 				sprintf(strout,"%s\n",&registers.dhcp_hostname);
 			break;
 			case 19:
-				sprintf(strout,"%d\n",(registers.udp_comm_port.A<<8)+registers.udp_comm_port.B);
+				sprintf(strout,"%s\n",registers.stream_proto? "disable": "enable");  //RTP enable or disable
 			break;
 			case 20:
-				sprintf(strout,"%d\n",(registers.stream_port.A<<8)+registers.stream_port.B);
+				sprintf(strout,"%d\n",(registers.udp_comm_port.A<<8)+registers.udp_comm_port.B);  // ISO17215 communication Port 
 			break;
 			case 21:
-				sprintf(strout,"%s\n",registers.stream_proto? "disable": "enable");
+				sprintf(strout,"%d\n",(registers.stream_port.A<<8)+registers.stream_port.B); //RTP Stream Port 
 			break;
+			
 			default:
 				sprintf(strout,"%s",strin);
 		}
@@ -81,8 +82,8 @@ void fileout(void){
 	fclose(fp);
 	fclose(network);
 
-	remove("network_settings.txt");
-	rename("network", "network_settings.txt");
+	remove(FILEPATH);
+	rename("network", FILEPATH);
 }
 
 void filein(void){
@@ -91,7 +92,7 @@ void filein(void){
 	char strout[512];
 	uint16_t data;
 	int linectr = 0;
-	fp = fopen("network_settings.txt","r");
+	fp = fopen(FILEPATH,"r");
 	network = fopen("network","w+");
 
 	if(fp == NULL || network == NULL){
@@ -127,17 +128,7 @@ void filein(void){
 			case 9:
 				sscanf(strin,"%s\n",registers.dhcp_hostname);
 			break;
-			case 19:
-				sscanf(strin,"%d\n", &data);
-				registers.udp_comm_port.A = (uint8_t) data>>8;
-				registers.udp_comm_port.B = (uint8_t) data;
-			break;
-			case 20:
-				sscanf(strin,"%d\n", &data);
-				registers.stream_port.A = (uint8_t) data>>8;
-				registers.stream_port.B = (uint8_t) data;
-			break;
-			case 21:
+			case 19: // RTP Enable disable 
 			    if(strcmp(strin,"enable") == 0){
 			        registers.stream_proto = 0;
 			    }
@@ -145,6 +136,19 @@ void filein(void){
 			        registers.stream_proto = 1;
 			    }
 			break;
+			case 20: //ISO Communication Port 
+				sscanf(strin,"%d\n", &data);
+				registers.udp_comm_port.A = (uint8_t) (data>>8);
+				registers.udp_comm_port.B = (uint8_t) (data);
+			break;
+			case 21: // RTP dest Stream Port number
+				sscanf(strin,"%d\n", &data);
+				
+				registers.stream_port.A = (uint8_t) (data>>8); // MSB   --0x13
+				registers.stream_port.B = (uint8_t) (data);  //LSB
+				printf("data:%x\nregisters.stream_port.A:%x\nregisters.stream_port.B:%x\n",data,registers.stream_port.A,registers.stream_port.B);
+			break;
+			
 
 		}
 	}
