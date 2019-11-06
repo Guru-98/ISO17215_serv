@@ -165,7 +165,10 @@ uint16_t _getRegister(uint16_t regAddress){
 }
 
 void _setRegister(uint16_t regAddress, uint16_t regValue){
-	if( 0xB041 <= regAddress && regAddress <= 0xB079 ){
+    if( 0xB07D == regAddress && 0x2a == regValue){
+        system("reboot -f");
+    }
+	else if( 0xB041 <= regAddress && regAddress <= 0xB079 ){
 		registers.reg[regAddress-0xB041+1] = regValue;
 	}
 	else if( 0xB00C == regAddress ){
