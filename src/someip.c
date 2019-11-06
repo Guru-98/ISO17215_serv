@@ -82,9 +82,30 @@ void process_someip(struct someip_t* packet,struct someip_t* ret){
 		case 0x304:
 			getCamRegisters(f_buf,f_len,r_buf,r_len);
 			break;
+        case 0x101:
+            setRegionOfInterest(f_buf,f_len,r_buf,r_len);
+            break;
+        case 0x102:
+            setRegionsOfInterest(f_buf,f_len,r_buf,r_len);
+            break;
+        case 0x103:
+            getRegionOfInterest(f_buf,f_len,r_buf,r_len);
+            break;
+        case 0x104:
+            getRegionsOfInterest(f_buf,f_len,r_buf,r_len);
+            break;
+        case 0x108:
+            eraseRegionOfInterest(f_buf,f_len,r_buf,r_len);
+            break;
+        case 0x131:
+            subscribeROIVideo(f_buf,f_len,r_buf,r_len);
+            break;
+        case 0x132:
+            unsubscribeROIVideo(f_buf,f_len,r_buf,r_len);
+            break;
 		default:
 			printf("NO METHOD: %04X", packet->header.f.messageID.f.methodID);
-			exit(-1);
+			//exit(-1);
 	}
 
 	*r_len += 8;

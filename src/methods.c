@@ -56,8 +56,6 @@ void setCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 
 	_setRegisters(regBlock, no_reg);
 
-	fileout();
-
 	*rlen = 0;
 	*retbuf = NULL;
 	printf("METHOD OUT: %s\n",__FUNCTION__);
@@ -102,7 +100,7 @@ void getCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 	}
 
 	//dump((char *)regBlock, sizeof(struct sImagerRegister) * no_reg);
-	dump_registers();
+	//dump_registers();
 
 	*rlen = sizeof(struct sImagerRegister) * no_reg + sizeof(no_reg);
 	*retbuf = (char *) malloc(*rlen + sizeof(no_reg));
@@ -117,6 +115,8 @@ void getCamRegisters(char* payload,int len,char** retbuf, int* rlen){
 void eraseCamExclusive(char* payload,int len,char** retbuf, int* rlen){
 	printf("METHOD: %s\n",__FUNCTION__);
 
+    fileout();
+
 	lock = 0;
 	lockedby = 0;
 
@@ -125,9 +125,8 @@ void eraseCamExclusive(char* payload,int len,char** retbuf, int* rlen){
 	printf("METHOD OUT: %s\n",__FUNCTION__);
 }
 
-
 void _setRegisters(struct sImagerRegister* regBlock, uint16_t no_reg){
-	for(int i=0; i<no_reg; i++){
+    for(int i=0; i<no_reg; i++){
 		_setRegister(regBlock[i].reg, regBlock[i].val);
 	}
 }
@@ -179,4 +178,82 @@ void _setRegister(uint16_t regAddress, uint16_t regValue){
 		printf("No such register: %04X\n", regAddress);
 		exit(-1);
 	}
+}
+
+void setRegionOfInterest(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    dump(payload,len);
+    printf("strctlen:%d ; paylen:%d",sizeof(inp_setROI),len);
+
+    memcpy(&inp_setROI, payload, sizeof(inp_setROI));
+
+    #define S16(X) ((X) = htons(X))
+    #define S32(X) ((X) = htonl(X))
+    S32(inp_setROI.roiIndex);
+    S16(inp_setROI.upl_x);
+    S16(inp_setROI.upl_y);
+    S16(inp_setROI.dnr_x);
+    S16(inp_setROI.dnr_y);
+    S16(inp_setROI.transCycle);
+    S16(inp_setROI.width);
+    S16(inp_setROI.height);
+    S32(inp_setROI.framerate);
+    S32(inp_setROI.bitrate);
+    S16(inp_setROI.noBins);
+
+    printf("width:%x\n",inp_setROI.width);
+    printf("height:%x\n",inp_setROI.height);
+    printf("bitrate:%x\n",inp_setROI.bitrate);
+    printf("codec:%x\n",inp_setROI.compression_type);
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
+}
+
+void setRegionsOfInterest(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
+}
+
+void getRegionOfInterest(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
+}
+
+void getRegionsOfInterest(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
+}
+
+void eraseRegionOfInterest(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
+}
+
+void subscribeROIVideo(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
+}
+
+void unsubscribeROIVideo(char* payload, int len, char** retbuf, int* rlen){
+	printf("METHOD: %s\n",__FUNCTION__);
+
+    
+
+	printf("METHOD OUT: %s\n",__FUNCTION__);
 }
