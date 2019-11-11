@@ -50,6 +50,9 @@ void net_fileout(void){
 		if(!feof(fp)){
 			++linectr;
 		}
+		else{
+			break;
+		}
 		printf("-%d : %s",linectr,strin);
 		switch(linectr){
 			case 1:
@@ -116,6 +119,9 @@ void net_filein(void){
 		if(!feof(fp)){
 			++linectr;
 		}
+		else{
+			break;
+		}
 		printf("-%d : %s",linectr,strin);
 		switch(linectr){
 			case 1:
@@ -142,7 +148,7 @@ void net_filein(void){
 			    else if(strcmp(strin,"disable") == 0){
 			        registers.enable_rtsp = 1;
 			    }
-            break;
+		            break;
 			case 20: //ISO Communication Port
 				sscanf(strin,"%d\n", &data);
 				registers.udp_comm_port.A = (uint8_t) (data>>8);
@@ -188,6 +194,9 @@ void vid_fileout(void){
 		fgets(strin, 512, fp);
 		if(!feof(fp)){
 			++linectr;
+		}
+		else{
+			break;
 		}
 		printf("-%d : %s",linectr,strin);
 		switch(linectr){
@@ -257,6 +266,9 @@ void vid_filein(void){
 		fgets(strin, 512, fp);
 		if(!feof(fp)){
 			++linectr;
+		}
+		else{
+			break;
 		}
 		printf("-%d : %s",linectr,strin);
 		switch(linectr){
